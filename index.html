@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Comaararti imagens - anunvcui</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentarios</title>
+    <style>
+    .preview-container img {
+    max-width: 50px;
+    max-height: 50px;
+    border-radius: 5px;
+    margin-left: 10px;
+    display: none; /* Ocultar por defecto */
+} 
+      
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://source.unsplash.com/random/1920x1080?technology') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .comment-box, .comment {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            width: 400px;
+            margin: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .comment-box input, .reply-input {
+            width: 70%;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+        }
+        .comment-box button, .reply-button {
+            background: black;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .comment p {
+            font-weight: bold;
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .actions span {
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .replies {
+            display: none; 
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 2px solid gray;
+            max-width: 90%;
+        }
+        .replies .comment {
+            width: 90%;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px 0;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #commentsSection {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: center;
+        }
+        .comment img {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+        .upload-icon {
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: 10px;
+        }
+        .upload-icon input {
+            display: none;
+        }
+    </style>
+    <script>
+        let selectedImage = null; // Variable para guardar la imagen seleccionada
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0]; // Obtener el archivo seleccionado
+            if (file) {
+                selectedImage = file; // Guardamos temporalmente la imagen
+            }
+        }
+
+        function postComment() {
+            var input = document.getElementById("commentInput");
+            var commentText = input.value.trim();
+
+            if (commentText !== "" || selectedImage) {
+                var commentContainer = document.createElement("div");
+                commentContainer.classList.add("comment");
+
+                var commentParagraph = document.createElement("p");
+                commentParagraph.innerText = commentText;
+
+                var actionsDiv = document.createElement("div");
+                actionsDiv.classList.add("actions");
+
+                var likeSpan = document.createElement("span");
+                likeSpan.innerHTML = "👍 Me gusta (<span class='like-count'>0</span>)";
+                likeSpan.style.cursor = "pointer";
+                likeSpan.onclick = function () {
+                    likeComment(likeSpan);
+                };
+
+                var commentSpan = document.createElement("span");
+                commentSpan.innerHTML = "💬 Comentar";
+                commentSpan.style.cursor = "pointer";
+                commentSpan.onclick = function () {
+                    toggleReplies(repliesDiv);
+                };
+
+                var shareSpan = document.createElement("span");
+                shareSpan.innerHTML = "🔄 Compartir";
+
+                actionsDiv.appendChild(likeSpan);
+                actionsDiv.appendChild(commentSpan);
+                actionsDiv.appendChild(shareSpan);
+
+                var repliesDiv = document.createElement("div");
+                repliesDiv.classList.add("replies");
+
+                commentContainer.appendChild(commentParagraph);
+
+                if (selectedImage) {
+                    var imgElement = document.createElement("img");
+                    imgElement.src = URL.createObjectURL(selectedImage);
+                    commentContainer.appendChild(imgElement);
+                    selectedImage = null; // Limpiamos la variable después de publicar
+                }
+
+                commentContainer.appendChild(actionsDiv);
+                commentContainer.appendChild(repliesDiv);
+
+                document.getElementById("commentsSection").appendChild(commentContainer);
+
+                input.value = "";
+                document.getElementById("imageInput").value = "";
+            }
+        }
+
+        function likeComment(likeSpan) {
+            var likeCount = likeSpan.querySelector(".like-count");
+            var currentLikes = parseInt(likeCount.innerText);
+            likeCount.innerText = currentLikes + 1;
+        }
+
+        function toggleReplies(repliesDiv) {
+            if (repliesDiv.style.display === "none" || repliesDiv.style.display === "") {
+                repliesDiv.style.display = "block";
+                addReplyBox(repliesDiv);
+            } else {
+                repliesDiv.style.display = "none";
+            }
+        }
+
+        function addReplyBox(repliesDiv) {
+            if (!repliesDiv.querySelector(".reply-input")) { 
+                var replyInput = document.createElement("input");
+                replyInput.type = "text";
+                replyInput.classList.add("reply-input");
+                replyInput.placeholder = "Escribe una respuesta...";
+
+                var replyButton = document.createElement("button");
+                replyButton.innerText = "➤";
+                replyButton.classList.add("reply-button");
+                replyButton.onclick = function () {
+                    postReply(repliesDiv, replyInput);
+                };
+
+                var replyContainer = document.createElement("div");
+                replyContainer.appendChild(replyInput);
+                replyContainer.appendChild(replyButton);
+
+                repliesDiv.appendChild(replyContainer);
+            }
+        }
+
+        function postReply(repliesDiv, replyInput) {
+            var replyText = replyInput.value.trim();
+
+            if (replyText !== "") {
+                var replyContainer = document.createElement("div");
+                replyContainer.classList.add("comment");
+
+                var replyParagraph = document.createElement("p");
+                replyParagraph.innerText = replyText;
+
+                replyContainer.appendChild(replyParagraph);
+                repliesDiv.appendChild(replyContainer);
+
+                replyInput.value = "";
+            }
+        }
+      
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        selectedImage = file;
+        showPreview(file);
+    }
+}
+
+function showPreview(file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById("imagePreview");
+        preview.src = e.target.result;
+        preview.style.display = "block"; // Mostrar la imagen
+    };
+    reader.readAsDataURL(file);
+}
+     
+      
+      
+      
+    </script>
+</head>
+<body>
+    <div class="comment-box">
+        <input type="text" id="commentInput" placeholder="ESCRIBE TU COMENTARIO">
+        <label class="upload-icon">📷
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+        </label>
+        <button onclick="postComment()">➤</button>
+    </div>
+
+    <div id="commentsSection"></div>
+
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
